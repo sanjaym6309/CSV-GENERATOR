@@ -13,6 +13,7 @@ if not GOOGLE_API_KEY:
     st.stop()
 
 genai.configure(api_key=GOOGLE_API_KEY)
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 def generate_password(length=10):
     chars = string.ascii_letters + string.digits + "!@#$%^&*"
@@ -80,4 +81,5 @@ Output ONLY the full edited CSV - do not add any explanation."""
         st.code(edited_csv, language='csv')
 else:
     st.info("👆 Enter details and click Generate CSV to begin.")
+
 
