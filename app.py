@@ -7,7 +7,7 @@ import io
 import google.generativeai as genai
 
 # 1. Configure Gemini API Key
-GOOGLE_API_KEY = st.secrets.get("GOOGLE_API_KEY") or os.getenv("GOOGLE_API_KEY")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
     st.error("⚠️ Missing Google Generative AI Key! Add it to .streamlit/secrets.toml or environment variables.")
     st.stop()
@@ -80,3 +80,4 @@ Output ONLY the full edited CSV - do not add any explanation."""
         st.code(edited_csv, language='csv')
 else:
     st.info("👆 Enter details and click Generate CSV to begin.")
+
