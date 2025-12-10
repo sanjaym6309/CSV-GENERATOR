@@ -6,20 +6,65 @@ import string
 import io
 import google.generativeai as genai
 
+
+# -----------------------------
 # 1. Configure Gemini API Key
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+# -----------------------------
+st.set_page_config(page_title="VANO User List CSV Generator", page_icon="📋", layout="wide")
+
+st.sidebar.header("🔐 Gemini API Key Settings")
+
+# Your default (owner) key from env or secrets
+DEFAULT_GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY", None)
+
+# User-entered key (masked)
+user_api_key = st.sidebar.text_input(
+    "Enter your Gemini API Key",
+    type="password",
+    placeholder="Paste your key here",
+    help="Optional: If left empty, the app will use the default built‑in API key."
+)
+
+# Button to open Google AI Studio API key dashboard
+st.sidebar.link_button(
+    "🔑 Get / Manage Gemini API Key",
+    "https://aistudio.google.com/app/apikey",
+    help="Opens Google AI Studio where you can generate and manage your API keys."
+)
+
+# Instructions
+st.sidebar.markdown(
+    """
+**Instructions**
+
+1. Click **"Get / Manage Gemini API Key"** to open Google AI Studio.
+2. Sign in with your Google account.
+3. Create or copy an existing Gemini API key.
+4. Paste the key into the field above.
+5. If you do **not** enter anything, the app will use the default API key configured on the server.
+"""
+)
+
+# Final key selection: user key first, otherwise default
+GOOGLE_API_KEY = user_api_key.strip() if user_api_key.strip() else DEFAULT_GOOGLE_API_KEY
+
 if not GOOGLE_API_KEY:
-    st.error("⚠️ Missing Google Generative AI Key! Add it to .streamlit/secrets.toml or environment variables.")
+    st.error(
+        "⚠️ No Gemini API key available.\n\n"
+        "Either:\n"
+        "- Set GOOGLE_API_KEY in environment variables or `.streamlit/secrets.toml`, **or**\n"
+        "- Paste a key in the sidebar input."
+    )
     st.stop()
 
 genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel("gemini-2.0-flash")
+
 
 def generate_password(length=10):
     chars = string.ascii_letters + string.digits + "!@#$%^&*"
     return ''.join(secrets.choice(chars) for _ in range(length))
 
-st.set_page_config(page_title="VANO User List CSV Generator", page_icon="📋", layout="wide")
+
 st.title("📋 VANO User List CSV Generator")
 
 # UI
@@ -49,11 +94,13 @@ if not validation_failed and st.button("Generate CSV"):
     if comment:
         csv_rows.append([f"# {comment}"])
     csv_rows.append(["name", "email", "password", "role", "department"])
+
     for vano in range(vano_start, vano_end + 1):
         name = str(vano)
         email = f"{vano}@velsrscollege.com"
         password = generate_password()
         csv_rows.append([name, email, password, role, department])
+
     output = io.StringIO()
     writer = csv.writer(output)
     for row in csv_rows:
@@ -67,6 +114,8 @@ if not validation_failed and st.button("Generate CSV"):
         st.markdown("#### 🔎 Preview (optional)")
         st.code(csv_data, language='csv')
     else:
+        # Gemini AI edit
+        model = genai.GenerativeModel("gemini-2.5-flash-lite")
         prompt = f"""You are an expert CSV editor.
 Here is a user list CSV:
 {csv_data}
@@ -81,5 +130,3 @@ Output ONLY the full edited CSV - do not add any explanation."""
         st.code(edited_csv, language='csv')
 else:
     st.info("👆 Enter details and click Generate CSV to begin.")
-
-
