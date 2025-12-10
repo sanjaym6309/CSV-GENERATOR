@@ -27,7 +27,7 @@ user_api_key = st.sidebar.text_input(
 
 # Button to open Google AI Studio API key dashboard
 st.sidebar.link_button(
-    "🔑 Get / Manage Gemini API Key",
+    "🔑 Get Gemini API Key",
     "https://aistudio.google.com/app/apikey",
     help="Opens Google AI Studio where you can generate and manage your API keys."
 )
@@ -130,3 +130,4 @@ Output ONLY the full edited CSV - do not add any explanation."""
         st.code(edited_csv, language='csv')
 else:
     st.info("👆 Enter details and click Generate CSV to begin.")
+
